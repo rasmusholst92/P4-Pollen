@@ -3,13 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-#t
-
 def main():
     actualization_date = get_actualization_date()
     urls = get_pollen_urls(actualization_date)
     pollen_data = get_pollens(urls)
-    #weather_data = get_weather_data()
+    weather_data = get_weather_data()
     data = merge_pollen_and_weather(weather_data, pollen_data, actualization_date)
     print(data)
 
@@ -31,6 +29,7 @@ def merge_pollen_and_weather(weather_data, pollen_data, actualization_date):
     return data
 
 def get_weather_data():
+    # Henter data fra CSV
     weather_data = pd.read_csv('https://data.public.lu/en/datasets/r/a67bd8c0-b036-4761-b161-bdab272302e5',
                                encoding='latin', index_col=0, parse_dates=True, dayfirst=True)
     weather_data.columns = ['High Temperature', 'Low Temperature', 'Precipitation']
@@ -43,6 +42,7 @@ def get_weather_data():
 def get_actualization_date():
     response = requests.get("http://www.pollen.lu/index.php?qsPage=data&year=1992&week=0&qsLanguage=Fra")
     soup = BeautifulSoup(response.text, 'html.parser')
+    # Finder alle table tags fra HTML scrape.
     html_tables = soup.find_all('table')
     pollen_table = html_tables[5]
     date_start = pollen_table.text.find('Actualisation: ') + 15
